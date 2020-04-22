@@ -16,7 +16,7 @@ import model.Asiakas;
 import model.dao.Dao;
 
 
-@WebServlet("/asiakkaat")
+@WebServlet("/asiakkaat/*")
 public class Asiakkaat extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
@@ -24,16 +24,18 @@ public class Asiakkaat extends HttpServlet {
     
     public Asiakkaat() {
         super();
-        System.out.println("Asiakkaat.Asiakkaat()");
        
     }
 
 	
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("Asiakkaat.doGet()");
+		String pathInfo = request.getPathInfo();
+		System.out.println("polku: " + pathInfo);
+		String hakusana = pathInfo.replace("/", "");
+		System.out.println(hakusana);
 		Dao dao = new Dao();
-		ArrayList<Asiakas> asiakkaat = dao.listaaKaikki();
-		System.out.println(asiakkaat);
+		ArrayList<Asiakas> asiakkaat = dao.listaaKaikki(hakusana);
+		//System.out.println(asiakkaat);
 		String strJSON = new JSONObject().put("asiakkaat", asiakkaat).toString();
 		response.setContentType("application/json");
 		PrintWriter out = response.getWriter();

@@ -3,20 +3,37 @@
 th, td {
 	border: 1px solid #ddd;
 	padding: 8px;
+	
 }
 
 tr:nth-child(even) {
 	background-color: #f2f2f2;
 }
 
-tr:hover {
-	background-color: #ddd;
+thead {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: left;	
 }
 
-th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: blue;
-  color: white;
+.hakurivi {
+	color: white;
+	background: blue;
+}
+
+.otsikkorivi {
+	color: black;
+	background-color: #f2f2f2;
+}
+
+.oikealle {
+	text-align: right;
+}
+
+.keskelle {
+	text-align: center;
+}
+
+.nappula:focus {
+	color: red;
 }
