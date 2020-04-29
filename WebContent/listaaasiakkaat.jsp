@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>Listaa asiakastiedot</title>
 <link rel="stylesheet" type="text/css" href="main.css" />
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -12,10 +12,16 @@
 <body>
 	<table id="asiakasTaulu">
 		<thead>
+			<tr>
+				<th colspan="6" class="hakurivi"><span id="uusiAsiakas">Lisää
+						asiakas</span>
+			</tr>
 			<tr class="hakurivi">
-				<th class="oikealle">Haku:</th>
-				<th colspan="3"><input type="text" id="hakusana"></th>
-				<th><input class="nappula" type="button" value="Hae" id="hakunappi" /></th>
+				<th style="color: black">Haku:</th>
+				<th colspan="4" style="text-align: left"><input type="text"
+					id="hakusana" size="50"></th>
+				<th style="text-align: left"><input class="nappula"
+					type="button" value="Hae" id="hakunappi" /></th>
 			</tr>
 			<tr class="otsikkorivi">
 				<th>Asiakas ID</th>
@@ -23,6 +29,7 @@
 				<th>Sukunimi</th>
 				<th>Puhelin</th>
 				<th>Sähköposti</th>
+				<th></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -31,9 +38,15 @@
 	<script>
 		$(document).ready(function() {
 			haeAsiakkaat();
+
+			$("#uusiAsiakas").click(function() {
+				document.location = "lisaaasiakas.jsp";
+			});
+
 			$("#hakunappi").click(function() {
 				haeAsiakkaat();
 			});
+
 			$(document.body).on("keydown", function(event) {
 				if (event.which == 13) {
 					haeAsiakkaat();
@@ -51,18 +64,41 @@
 				success : function(result) {
 					$.each(result.asiakkaat, function(i, field) {
 						var htmlStr;
-						htmlStr += "<tr>";
-						htmlStr += "<td class='keskelle'>" + field.asiakas_id
-								+ "</td>";
+						htmlStr += "<tr id='rivi_"+field.asiakas_id+"'>";
+						htmlStr += "<td>" + field.asiakas_id + "</td>";
 						htmlStr += "<td>" + field.etunimi + "</td>";
 						htmlStr += "<td>" + field.sukunimi + "</td>";
 						htmlStr += "<td>" + field.puhelin + "</td>";
-						htmlStr += "<td>" + field.sposti + "</td></tr>";
+						htmlStr += "<td>" + field.sposti + "</td>";
+						htmlStr += "<td><span class='poista' onclick=poista('"
+								+ field.asiakas_id + "')>Poista</span></td>";
+						htmlStr += "</tr>";
 						$("#asiakasTaulu tbody").append(htmlStr);
 					});
 				}
 			});
 		};
+
+		function poista(asiakas_id) {
+			if (confirm("Poista asiakas: " + asiakas_id + "?")) {
+				$.ajax({
+					url : "asiakkaat/" + asiakas_id,
+					type : "DELETE",
+					dataType : "json",
+					success : function(result) {
+						if (result.response == 0) {
+							$("ilmo").html("Asiakkaan poisto epäonnistui");
+						} else if (result.response == 1) {
+							$("#rivi_" + asiakas_id).css("background-color",
+									"red");
+							alert("Asiakkaan: " + asiakas_id
+									+ " poisto onnistui.");
+							haeAsiakkaat();
+						}
+					}
+				});
+			}
+		}
 	</script>
 </body>
 </html>

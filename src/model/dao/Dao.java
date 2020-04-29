@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import model.Asiakas;
@@ -20,13 +21,13 @@ public class Dao {
 		String path = System.getProperty("catalina.base");
 		path = path.substring(0, path.indexOf(".metadata")).replace("\\", "");
 		String url = "jdbc:sqlite:" + path + db;
-		//System.out.println(url);
+		// System.out.println(url);
 		try {
 
 			Class.forName("org.sqlite.JDBC");
-			//System.out.println("Dao.yhdista() -- after Class.forName");
+			// System.out.println("Dao.yhdista() -- after Class.forName");
 			con = DriverManager.getConnection(url);
-			//System.out.println("Dao.yhdista() -- Yhteys avattu");
+			// System.out.println("Dao.yhdista() -- Yhteys avattu");
 		} catch (Exception e) {
 			System.out.println("Dao.yhdista() -- Yhteyden avaaminen ei onnistunut");
 			e.printStackTrace();
@@ -34,18 +35,17 @@ public class Dao {
 		return con;
 	}
 
-
 	public ArrayList<Asiakas> listaaKaikki() {
 		ArrayList<Asiakas> asiakkaat = new ArrayList<Asiakas>();
 		sql = "SELECT * FROM asiakkaat";
 		try {
 			con = yhdista();
 			if (con != null) {
-				//System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
+				// System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
 				stmtPrep = con.prepareStatement(sql);
 				rs = stmtPrep.executeQuery();
 				if (rs != null) {
-					//System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
+					// System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
 					while (rs.next()) {
 						Asiakas asiakas = new Asiakas();
 						asiakas.setAsiakas_id(rs.getInt(1));
@@ -54,7 +54,7 @@ public class Dao {
 						asiakas.setPuhelin(rs.getString(4));
 						asiakas.setSposti(rs.getString(5));
 						asiakkaat.add(asiakas);
-						
+
 					}
 				}
 
@@ -73,7 +73,7 @@ public class Dao {
 		try {
 			con = yhdista();
 			if (con != null) {
-				//System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
+				// System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
 				stmtPrep = con.prepareStatement(sql);
 				stmtPrep.setString(1, "%" + hakusana + "%");
 				stmtPrep.setString(2, "%" + hakusana + "%");
@@ -81,7 +81,7 @@ public class Dao {
 				stmtPrep.setString(4, "%" + hakusana + "%");
 				rs = stmtPrep.executeQuery();
 				if (rs != null) {
-					//System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
+					// System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
 					while (rs.next()) {
 						Asiakas asiakas = new Asiakas();
 						asiakas.setAsiakas_id(rs.getInt(1));
@@ -90,7 +90,7 @@ public class Dao {
 						asiakas.setPuhelin(rs.getString(4));
 						asiakas.setSposti(rs.getString(5));
 						asiakkaat.add(asiakas);
-						
+
 					}
 				}
 
@@ -101,6 +101,41 @@ public class Dao {
 		}
 
 		return asiakkaat;
+	}
+
+	public boolean lisaaasiakas(Asiakas asiakas) {
+		boolean paluuArvo = true;
+		sql = "INSERT INTO asiakkaat (etunimi, sukunimi, puhelin, sposti) VALUES (?,?,?,?)";
+		try {
+			con = yhdista();
+			stmtPrep = con.prepareStatement(sql);
+			stmtPrep.setString(1, asiakas.getEtunimi());
+			stmtPrep.setString(2, asiakas.getSukunimi());
+			stmtPrep.setString(3, asiakas.getPuhelin());
+			stmtPrep.setString(4, asiakas.getSposti());
+			stmtPrep.executeUpdate();
+			con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			paluuArvo = false;
+		}
+		return paluuArvo;
+	}
+
+	public boolean poistaAsiakas(int asiakas_id) {
+		boolean paluuArvo = true;
+		sql = "DELETE FROM asiakkaat WHERE asiakas_id = ?";
+		try {
+			con = yhdista();
+			stmtPrep = con.prepareStatement(sql);
+			stmtPrep.setInt(1, asiakas_id);
+			stmtPrep.executeUpdate();
+			con.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			paluuArvo = false;
+		}
+		return paluuArvo;
 	}
 
 	public Dao() {

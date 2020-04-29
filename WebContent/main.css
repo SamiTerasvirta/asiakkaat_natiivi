@@ -3,7 +3,6 @@
 th, td {
 	border: 1px solid #ddd;
 	padding: 8px;
-	
 }
 
 tr:nth-child(even) {
@@ -13,12 +12,13 @@ tr:nth-child(even) {
 thead {
 	padding-top: 12px;
 	padding-bottom: 12px;
-	text-align: left;	
+	text-align: left;
 }
 
 .hakurivi {
 	color: white;
 	background: blue;
+	text-align: right;
 }
 
 .otsikkorivi {
@@ -36,4 +36,13 @@ thead {
 
 .nappula:focus {
 	color: red;
+}
+
+#uusiAsiakas, #takaisin {
+	color: white;
+	cursor: pointer;
+}
+
+.poista {
+	cursor: pointer;
 }

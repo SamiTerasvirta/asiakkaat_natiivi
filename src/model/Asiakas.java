@@ -3,7 +3,7 @@ package model;
 public class Asiakas {
 	private int asiakas_id;
 	private String etunimi, sukunimi, puhelin, sposti;
-	
+
 	public Asiakas() {
 		super();
 	}
@@ -62,7 +62,5 @@ public class Asiakas {
 		return "Asiakas [asiakas_id=" + asiakas_id + ", etunimi=" + etunimi + ", sukunimi=" + sukunimi + ", puhelin="
 				+ puhelin + ", sposti=" + sposti + "]";
 	}
-	
-	
 
 }
