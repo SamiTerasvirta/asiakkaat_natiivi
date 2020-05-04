@@ -45,4 +45,5 @@ thead {
 
 .poista {
 	cursor: pointer;
+	text-decoration: underline;
 }

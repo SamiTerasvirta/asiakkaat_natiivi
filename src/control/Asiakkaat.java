@@ -37,7 +37,28 @@ public class Asiakkaat extends HttpServlet {
 		Dao dao = new Dao();
 		ArrayList<Asiakas> asiakkaat = dao.listaaKaikki(hakusana);
 		// System.out.println(asiakkaat);
-		String strJSON = new JSONObject().put("asiakkaat", asiakkaat).toString();
+		String strJSON = "";
+		if (pathInfo == null) {
+			asiakkaat = dao.listaaKaikki();
+			strJSON = new JSONObject().put("asiakkaat", asiakkaat).toString();
+		} else if (pathInfo.indexOf("haeyksi") != -1) {
+			String asiakas_id = pathInfo.replace("/haeyksi/", "");
+			//System.out.println(asiakas_id);
+			Asiakas asiakas = dao.etsiAsiakas(asiakas_id);
+			//System.out.println(asiakas);
+			JSONObject JSON = new JSONObject();
+			JSON.put("asiakas_id", asiakas.getAsiakas_id());
+			JSON.put("etunimi", asiakas.getEtunimi());
+			JSON.put("sukunimi", asiakas.getSukunimi());
+			JSON.put("puhelin", asiakas.getPuhelin());
+			JSON.put("sposti", asiakas.getSposti());
+			strJSON = JSON.toString();
+		} else {
+			hakusana = pathInfo.replace("/", "");
+			asiakkaat = dao.listaaKaikki(hakusana);
+			strJSON = new JSONObject().put("asiakkaat", asiakkaat).toString();
+		}
+		
 		response.setContentType("application/json");
 		PrintWriter out = response.getWriter();
 		out.println(strJSON);
@@ -67,6 +88,26 @@ public class Asiakkaat extends HttpServlet {
 	protected void doPut(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		System.out.println("Asiakkaat.doPut()");
+		JSONObject jsonObj = new JsonStrToObj().convert(request);
+		System.out.println(jsonObj);
+		Dao dao = new Dao();
+		int asiakas_id = Integer.parseInt(jsonObj.getString("asiakas_id"));
+		Asiakas asiakas = dao.etsiAsiakas(jsonObj.getString("asiakas_id"));
+		System.out.println(asiakas);
+		
+		asiakas.setAsiakas_id(asiakas_id);
+		asiakas.setEtunimi(jsonObj.getString("etunimi"));
+		asiakas.setSukunimi(jsonObj.getString("sukunimi"));
+		asiakas.setPuhelin(jsonObj.getString("puhelin"));
+		asiakas.setSposti(jsonObj.getString("sposti"));
+		response.setContentType("application/json");
+		PrintWriter out = response.getWriter();
+		
+		if (dao.muutaAsiakas(asiakas, asiakas_id)) {
+			out.println("{\"response\":1}");
+		} else {
+			out.println("{\"response\":0}");
+		}
 	}
 
 	protected void doDelete(HttpServletRequest request, HttpServletResponse response)

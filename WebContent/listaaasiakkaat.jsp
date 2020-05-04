@@ -6,6 +6,8 @@
 <meta charset="UTF-8">
 <title>Listaa asiakastiedot</title>
 <link rel="stylesheet" type="text/css" href="main.css" />
+<link rel="shortcut icon" href="#">
+<!-- http://www.webweaver.nu/html-tips/favicon.shtml  -->
 <script
 	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
@@ -70,7 +72,9 @@
 						htmlStr += "<td>" + field.sukunimi + "</td>";
 						htmlStr += "<td>" + field.puhelin + "</td>";
 						htmlStr += "<td>" + field.sposti + "</td>";
-						htmlStr += "<td><span class='poista' onclick=poista('"
+						htmlStr += "<td><a href='muutaasiakas.jsp?asiakas_id="
+								+ field.asiakas_id + "'>Muuta</a>&nbsp;";
+						htmlStr += "<span class='poista' onclick=poista('"
 								+ field.asiakas_id + "')>Poista</span></td>";
 						htmlStr += "</tr>";
 						$("#asiakasTaulu tbody").append(htmlStr);
