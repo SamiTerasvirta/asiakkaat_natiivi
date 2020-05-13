@@ -21,13 +21,10 @@ public class Dao {
 		String path = System.getProperty("catalina.base");
 		path = path.substring(0, path.indexOf(".metadata")).replace("\\", "");
 		String url = "jdbc:sqlite:" + path + db;
-		// System.out.println(url);
 		try {
-
 			Class.forName("org.sqlite.JDBC");
-			// System.out.println("Dao.yhdista() -- after Class.forName");
 			con = DriverManager.getConnection(url);
-			// System.out.println("Dao.yhdista() -- Yhteys avattu");
+			System.out.println("Dao.yhdista() -- Yhteys avattu");
 		} catch (Exception e) {
 			System.out.println("Dao.yhdista() -- Yhteyden avaaminen ei onnistunut");
 			e.printStackTrace();
@@ -41,11 +38,11 @@ public class Dao {
 		try {
 			con = yhdista();
 			if (con != null) {
-				// System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
+				System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
 				stmtPrep = con.prepareStatement(sql);
 				rs = stmtPrep.executeQuery();
 				if (rs != null) {
-					// System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
+					System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
 					while (rs.next()) {
 						Asiakas asiakas = new Asiakas();
 						asiakas.setAsiakas_id(rs.getInt(1));
@@ -54,10 +51,9 @@ public class Dao {
 						asiakas.setPuhelin(rs.getString(4));
 						asiakas.setSposti(rs.getString(5));
 						asiakkaat.add(asiakas);
-
 					}
+					System.out.println(asiakkaat);
 				}
-
 			}
 			con.close();
 		} catch (Exception e) {
@@ -73,7 +69,7 @@ public class Dao {
 		try {
 			con = yhdista();
 			if (con != null) {
-				// System.out.println("Dao.listaaKaikki() -- Tietokantaan saatiin yhteys");
+				System.out.println("Dao.listaaKaikki(hakusana) -- Tietokantaan saatiin yhteys");
 				stmtPrep = con.prepareStatement(sql);
 				stmtPrep.setString(1, "%" + hakusana + "%");
 				stmtPrep.setString(2, "%" + hakusana + "%");
@@ -81,7 +77,7 @@ public class Dao {
 				stmtPrep.setString(4, "%" + hakusana + "%");
 				rs = stmtPrep.executeQuery();
 				if (rs != null) {
-					// System.out.println("Dao.listaaKaikki() -- Result Set haki taulun");
+					System.out.println("Dao.listaaKaikki(hakusana) -- Result Set haki taulun");
 					while (rs.next()) {
 						Asiakas asiakas = new Asiakas();
 						asiakas.setAsiakas_id(rs.getInt(1));
@@ -90,16 +86,14 @@ public class Dao {
 						asiakas.setPuhelin(rs.getString(4));
 						asiakas.setSposti(rs.getString(5));
 						asiakkaat.add(asiakas);
-
 					}
+					System.out.println("Dao.listaaKaikki(hakusana)\n" + asiakkaat);
 				}
-
 			}
 			con.close();
 		} catch (Exception e) {
-			System.out.println("Dao.listaaKaikki() -- Tietokannan lukeminen ei onnistunut");
+			System.out.println("Dao.listaaKaikki(hakusana) -- Tietokannan lukeminen ei onnistunut");
 		}
-
 		return asiakkaat;
 	}
 
@@ -137,7 +131,7 @@ public class Dao {
 		}
 		return paluuArvo;
 	}
-	
+
 	public Asiakas etsiAsiakas(String asiakas_id) {
 		Asiakas asiakas = null;
 		sql = "SELECT * FROM asiakkaat WHERE asiakas_id = ?";
@@ -159,13 +153,13 @@ public class Dao {
 			}
 			con.close();
 		} catch (Exception e) {
-			
+
 		}
-		
+
 		return asiakas;
-		
+
 	}
-	
+
 	public boolean muutaAsiakas(Asiakas asiakas, int asiakas_id) {
 		boolean paluuArvo = true;
 		sql = "UPDATE asiakkaat SET etunimi=?, sukunimi=?, puhelin=?, sposti = ? WHERE asiakas_id = ?";
@@ -184,7 +178,7 @@ public class Dao {
 			paluuArvo = false;
 		}
 		return paluuArvo;
-		
+
 	}
 
 	public Dao() {

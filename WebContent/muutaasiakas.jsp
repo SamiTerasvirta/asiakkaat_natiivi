@@ -1,39 +1,34 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html>
 <html>
 <head>
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script
-	src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
 <script src="scripts/main.js"></script>
 <link rel="stylesheet" type="text/css" href="main.css" />
 <link rel="shortcut icon" href="#">
 
-<meta charset="UTF-8">
+<meta charset="ISO-8859-1">
 <title>Muuta asiakkaan tiedot</title>
 </head>
-<body>
+<body onkeydown="tutkiKey(event)">
 	<form id="tiedot">
 		<table>
 			<thead>
 				<tr>
-					<th colspan="5" class="hakurivi"><span id="takaisin">Takaisin
-							listaukseen</span></th>
+					<th colspan="4" id="ilmo"></th>
+					<th colspan="2" class="oikealle"><a href="listaaasiakkaat.jsp"
+						id="takaisin">Takaisin listaukseen</a></th>
 				</tr>
 				<tr>
-					
 					<th>Etunimi</th>
 					<th>Sukunimi</th>
 					<th>Puhelin</th>
-					<th>S√§hk√∂posti</th>
+					<th>S‰hkˆposti</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
-					
 					<td><input type="text" name="etunimi" id="etunimi"
 						placeholder="Etunimi (*)"></td>
 					<td><input type="text" name="sukunimi" id="sukunimi"
@@ -41,101 +36,90 @@
 					<td><input type="text" name="puhelin" id="puhelin"
 						placeholder="Puhelinnumero"></td>
 					<td><input type="text" name="sposti" id="sposti"
-						placeholder="S√§hk√∂posti"></td>
-					<td><input type="submit" id="tallenna" value="Hyv√§ksy" /></td>
-					<td><input type="hidden" name="asiakas_id" id="asiakas_id" /></td>
+						placeholder="S‰hkˆposti"></td>
+					<td><input type="button" id="tallenna" value="Hyv‰ksy"
+						onclick="vieTiedot()" /></td>
+					<!-- <td><input type="hidden" name="asiakas_id" id="asiakas_id" /></td>  -->
 				</tr>
 			</tbody>
 		</table>
+		<input type="hidden" name="asiakas_id" id="asiakas_id" />
 	</form>
 	<span id="ilmo"></span>
-
 </body>
+
 <script>
-	$(document).ready(function() {
-		$("#takaisin").click(function() {
-			document.location = "listaaasiakkaat.jsp";
-		});
-		
-		var asiakas_id = requestURLParam("asiakas_id");
-		
-		$.ajax({
-			url : "asiakkaat/haeyksi/" + asiakas_id,
-			type : "GET",
-			dataType : "json",
-			success : function(result) {
-				$("#asiakas_id").val(result.asiakas_id);
-				$("#etunimi").val(result.etunimi);
-				$("#sukunimi").val(result.sukunimi);
-				$("#puhelin").val(result.puhelin);
-				$("#sposti").val(result.sposti);
-
-			}
-		});
-		
-		$("#tiedot").validate({
-			rules : {
-				etunimi : {
-					required : true,
-					maxlength : 50
-				},
-				sukunimi : {
-					required : true,
-					maxlength : 50
-				},
-				puhelin : {
-					required : false,
-					minlength : 5,
-					maxlength : 50
-				},
-				sposti : {
-					required : false,
-					minlength : 5,
-					maxlength : 100
-				}
-			},
-			messages : {
-				etunimi : {
-					required : "Pakollinen tieto",
-					maxlength : "Max 50 merkki√§"
-				},
-				sukunimi : {
-					required : "Pakollinen tieto",
-					maxlength : "Max 50 merkki√§"
-				},
-				puhelin : {
-					minlength : "Min 5 merkki√§",
-					maxlength : "Max 50 merkki√§"
-				},
-				sposti : {
-					minlength : "Min 5 merkki√§",
-					maxlength : "Max 100 merkki√§"
-				}
-			},
-			submitHandler : function(form) {
-				paivitaTiedot();
-			}
-
-		});
-	});
-
-function paivitaTiedot() {
-	var formJsonStr = formDataJsonStr($("#tiedot").serializeArray());
-	$.ajax({
-		url : "asiakkaat",
-		data : formJsonStr,
-		type : "PUT",
-		dataType : "json",
-		success : function(result) {
-			if (result.response == 0) {
-				$("#ilmo").html("Asiakkaan p√§ivitt√§minen ep√§onnistui.");
-			} else if (result.response == 1) {
-				$("#ilmo").html("Asiakkaan p√§ivitt√§minen onnistui.");
-				//$("#etunimi", "#sukunimi", "#puhelin", "#sposti").val("");
-			}
+	function tutkiKey(event) {
+		if (event.keyCode == 13) {
+			vieTiedot();
 		}
+	}
+	
+	document.getElementById("etunimi").focus();
+	
+	let asiakas_id = requestURLParam("asiakas_id");
+	console.log(asiakas_id);
+	fetch("asiakkaat/haeyksi/" + asiakas_id, {
+		method : "GET"
+	})
+	.then(function (response) {
+		return response.json()
+	})
+	.then(function (responseJson) {
+		console.log(responseJson);
+		document.getElementById("asiakas_id").value = responseJson.asiakas_id;
+		document.getElementById("etunimi").value = responseJson.etunimi;
+		document.getElementById("sukunimi").value = responseJson.sukunimi;
+		document.getElementById("puhelin").value = responseJson.puhelin;
+		document.getElementById("sposti").value = responseJson.sposti;
 	});
-}
+	
+	function vieTiedot() {
+		let ilmo = "";
+		if (document.getElementById("etunimi").value.length < 1) {
+			ilmo = "Anna etunimi."
+		} else if (document.getElementById("sukunimi").value.length < 1) {
+			ilmo = "Anna sukunimi."
+		} else if (document.getElementById("puhelin").value.length < 3) {
+			ilmo = "Anna kelvollinen puhelinnumero"
+		} else if (document.getElementById("sposti").value.length < 6) {
+			ilmo = "Anna kelvollinen s‰hkˆpostiosoite"
+		}
+		if (ilmo != "") {
+			document.getElementById("ilmo").innerHTML = ilmo;
+			setTimeout(() => {
+				document.getElementById("ilmo").innerHTML = "";
+			}, 5000);
+			return;
+		}
+		document.getElementById("etunimi").value=siivoa(document.getElementById("etunimi").value);
+		document.getElementById("sukunimi").value=siivoa(document.getElementById("sukunimi").value);
+		document.getElementById("puhelin").value=siivoa(document.getElementById("puhelin").value);
+		document.getElementById("sposti").value=siivoa(document.getElementById("sposti").value);	
+		
+		let formJsonStr=formDataToJSON(document.getElementById("tiedot"));
+		fetch("asiakkaat",{
+		      method: 'PUT',
+		      body:formJsonStr
+		    })
+		.then(function (response) {		
+			return response.json()
+		})
+		.then(function (responseJson) {
+			let vastaus = responseJson.response;		
+			if(vastaus==0){
+				document.getElementById("ilmo").innerHTML= "Tietojen p‰ivitys ep‰onnistui.";
+	      	}else if(vastaus==1){	        	
+	      		document.getElementById("ilmo").innerHTML= "Tietojen p‰ivitys onnistui.";			      	
+			}
+			setTimeout(() => {
+				document.getElementById("ilmo").innerHTML = "";
+			}, 5000);
+		});	
+		document.getElementById("tiedot").reset();
+	}
+	
+	
 </script>
 
 </html>

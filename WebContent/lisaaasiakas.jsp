@@ -1,30 +1,27 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script
-	src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"></script>
+<meta charset="ISO-8859-1">
 <script src="scripts/main.js"></script>
 <link rel="stylesheet" type="text/css" href="main.css" />
-<title>Lis√§√§ asiakastiedot</title>
+<title>Lis‰‰ asiakastiedot</title>
 </head>
-<body>
+<body onkeydown="tutkiKey(event)">
 	<form id="tiedot">
 		<table>
 			<thead>
 				<tr>
-					<th colspan="5" class="hakurivi"><span id="takaisin">Takaisin
-							listaukseen</span></th>
+					<th colspan="4" id="ilmo"></th>
+					<th colspan="3" class="oikealle"><a href="listaaasiakkaat.jsp"
+						id="takaisin">Takaisin listaukseen</a></th>
 				</tr>
 				<tr>
 					<th>Etunimi</th>
 					<th>Sukunimi</th>
 					<th>Puhelin</th>
-					<th>S√§hk√∂posti</th>
+					<th>S‰hkˆposti</th>
 					<th></th>
 				</tr>
 			</thead>
@@ -37,8 +34,9 @@
 					<td><input type="text" name="puhelin" id="puhelin"
 						placeholder="Puhelinnumero"></td>
 					<td><input type="text" name="sposti" id="sposti"
-						placeholder="S√§hk√∂posti"></td>
-					<td><input type="submit" id="tallenna" value="Lis√§√§" /></td>
+						placeholder="S‰hkˆposti"></td>
+					<td><input type="button" id="nappi" value="Lis‰‰"
+						onclick="lisaaTiedot()" /></td>
 				</tr>
 			</tbody>
 		</table>
@@ -48,73 +46,54 @@
 	<span id="ilmo"></span>
 </body>
 <script>
-	$(document).ready(function() {
-		$("#takaisin").click(function() {
-			document.location = "listaaasiakkaat.jsp";
-		});
+	document.getElementById("etunimi").focus();
+	const tutkiKey = event => { if (event.keyCode == 13) { lisaaTiedot() } }
 
-		$("#tiedot").validate({
-			rules : {
-				etunimi : {
-					required : true,
-					maxlength : 50
-				},
-				sukunimi : {
-					required : true,
-					maxlength : 50
-				},
-				puhelin : {
-					required : false,
-					minlength : 5,
-					maxlength : 50
-				},
-				sposti : {
-					required : false,
-					minlength : 5,
-					maxlength : 100
-				}
-			},
-			messages : {
-				etunimi : {
-					required : "Pakollinen tieto",
-					maxlength : "Max 50 merkki√§"
-				},
-				sukunimi : {
-					required : "Pakollinen tieto",
-					maxlength : "Max 50 merkki√§"
-				},
-				puhelin : {
-					minlength : "Min 5 merkki√§",
-					maxlength : "Max 50 merkki√§"
-				},
-				sposti : {
-					minlength : "Min 5 merkki√§",
-					maxlength : "Max 100 merkki√§"
-				}
-			},
-			submitHandler : function(form) {
-				lisaaTiedot();
+	const lisaaTiedot = () => {
+		var ilmo = "";
+		if (document.getElementById("etunimi").value.length < 1) {
+			ilmo = "Anna etunimi."
+		} else if (document.getElementById("sukunimi").value.length < 1) {
+			ilmo = "Anna sukunimi."
+		} else if (document.getElementById("puhelin").value.length < 3) {
+			ilmo = "Anna kelvollinen puhelinnumero"
+		} else if (document.getElementById("sposti").value.length < 6) {
+			ilmo = "Anna kelvollinen s‰hkˆpostiosoite"
+		}
+		if (ilmo != "") {
+			document.getElementById("ilmo").innerHTML = ilmo;
+			setTimeout(() => {
+				document.getElementById("ilmo").innerHTML = "";
+			}, 5000);
+			return;
+		}
+		document.getElementById("etunimi").value=siivoa(document.getElementById("etunimi").value);
+		document.getElementById("sukunimi").value=siivoa(document.getElementById("sukunimi").value);
+		document.getElementById("puhelin").value=siivoa(document.getElementById("puhelin").value);
+		document.getElementById("sposti").value=siivoa(document.getElementById("sposti").value);	
+			
+		let formJsonStr=formDataToJSON(document.getElementById("tiedot"));
+		fetch("asiakkaat",{
+		      method: 'POST',
+		      body:formJsonStr
+		    })
+		.then(function (response) {		
+			return response.json()
+		})
+		.then(function (responseJson) {
+			let vastaus = responseJson.response;		
+			if(vastaus==0){
+				document.getElementById("ilmo").innerHTML= "Asiakkaan lis‰‰minen ep‰onnistui.";
+	      	}else if(vastaus==1){	        	
+	      		document.getElementById("ilmo").innerHTML= "Asiakkaan lis‰‰minen onnistui.";			      	
 			}
-
-		});
-	});
-
-	function lisaaTiedot() {
-		var formJsonStr = formDataJsonStr($("#tiedot").serializeArray());
-		$.ajax({
-			url : "asiakkaat",
-			data : formJsonStr,
-			type : "POST",
-			dataType : "json",
-			success : function(result) {
-				if (result.response == 0) {
-					$("#ilmo").html("Asiakkaan lis√§√§minen ep√§onnistui.");
-				} else if (result.response == 1) {
-					$("#ilmo").html("Asiakkaan lis√§√§minen onnistui.");
-					$("#etunimi", "#sukunimi", "#puhelin", "#sposti").val("");
-				}
-			}
-		});
+			setTimeout(() => {
+				document.getElementById("ilmo").innerHTML = "";
+			}, 5000);
+		});	
+		document.getElementById("tiedot").reset();
+		document.getElementById("etunimi").focus();
 	}
+	
 </script>
 </html>
